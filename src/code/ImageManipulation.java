@@ -101,25 +101,27 @@ public class ImageManipulation {
         APImage image = new APImage(pathToFile);
         int width  = image.getWidth();
         int height = image.getHeight(); //since we can't use a enhanced for loop as you need to check the pixels on the side
+        APImage newImage = new APImage(pathToFile);
         for (int y = 0; y < height; y++){
             for (int x = 0; x < width; x++){
                 Pixel here = image.getPixel(x, y);//we need to use getPixel() from 138 of APImage.java
+                Pixel newHere = newImage.getPixel(x, y);
                 if (x == 0 || y == 0){ //check if its one of the edge ones
-                    here.setRed(255);
-                    here.setGreen(255);
-                    here.setBlue(255);
+                    newHere.setRed(255);
+                    newHere.setGreen(255);
+                    newHere.setBlue(255);
                 } else {
                     Pixel left = image.getPixel(x-1,y);
                     Pixel down = image.getPixel(x,y-1); 
 
                     if (Math.abs(getAverageColour(here) - getAverageColour(left)) > threshold || Math.abs(getAverageColour(here) - getAverageColour(down)) > threshold){ //check if the difference is above the threshold of 20. Math.abs gets the absolute value so you always have the difference
-                        here.setRed(0);
-                        here.setBlue(0);
-                        here.setGreen(0);
+                        newHere.setRed(0);
+                        newHere.setBlue(0);
+                        newHere.setGreen(0);
                     } else{
-                        here.setRed(255);
-                        here.setGreen(255);
-                        here.setBlue(255);
+                        newHere.setRed(255);
+                        newHere.setGreen(255);
+                        newHere.setBlue(255);
                     }
 
                 }
@@ -128,7 +130,7 @@ public class ImageManipulation {
 
             }
         }
-        image.draw();
+        newImage.draw();
     }
 
     /** CHALLENGE Four: Reflect Image
