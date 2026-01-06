@@ -11,11 +11,12 @@ public class ImageManipulation {
     public static void main(String[] args) {
         APImage image = new APImage("cyberpunk2077.jpg");
         image.draw();
-        grayScale("cyberpunk2077.jpg"); // i need to call it here since vscode only has the run button for main methods
+        /*grayScale("cyberpunk2077.jpg"); // i need to call it here since vscode only has the run button for main methods
         blackAndWhite("cyberpunk2077.jpg");
         edgeDetection("cyberpunk2077.jpg", 20);
         reflectImage("cyberpunk2077.jpg");
-        rotateImage("cyberpunk2077.jpg");
+        rotateImage("cyberpunk2077.jpg");*/
+        selectBlur("cyberpunk2077.jpg", 10, 10, 1000, 500, 1);
     }
 
     /** CHALLENGE ONE: Grayscale
@@ -107,12 +108,12 @@ public class ImageManipulation {
                 Pixel here = image.getPixel(x, y);//we need to use getPixel() from 138 of APImage.java
                 Pixel newHere = newImage.getPixel(x, y);
                 if (x == 0 || y == 0){ //check if its one of the edge ones
-                    newHere.setRed(255);
+                    newHere.setRed(255); //if its one of the pixels on the edge it will turn white
                     newHere.setGreen(255);
                     newHere.setBlue(255);
                 } else {
                     Pixel left = image.getPixel(x-1,y);
-                    Pixel down = image.getPixel(x,y-1); 
+                    Pixel down = image.getPixel(x,y+1); 
 
                     if (Math.abs(getAverageColour(here) - getAverageColour(left)) > threshold || Math.abs(getAverageColour(here) - getAverageColour(down)) > threshold){ //check if the difference is above the threshold of 20. Math.abs gets the absolute value so you always have the difference
                         newHere.setRed(0);
@@ -186,6 +187,65 @@ public class ImageManipulation {
             }
         }
         rotated.draw();
+    }
+
+    //Implementation Crit B
+    public static void selectBlur(String pathToFile, int x1, int y1, int x2, int y2, int w){
+        APImage image = new APImage(pathToFile);
+        int width  = image.getWidth();
+        int height = image.getHeight();
+        APImage blurred = new APImage(pathToFile);
+        int left   = Math.min(x1, x2);  // left edge, finds the smaller value
+        int right  = Math.max(x1, x2);  // right edge, finds the bigger value
+        int top    = Math.min(y1, y2);  // top edge cuz y=0 is at the top in java
+        int bottom = Math.max(y1, y2);  // bottom edge
+        for (int x = left; x <= right; x++){
+            for (int y = top; y <= bottom; y++){
+                Pixel center = image.getPixel(x, y);
+                Pixel newCenter = blurred.getPixel(x, y);
+                Pixel adjacent1 = image.getPixel(x+1, y); 
+                Pixel adjacent2 = image.getPixel(x-1, y); 
+                Pixel adjacent3 = image.getPixel(x, y+1); 
+                Pixel adjacent4 = image.getPixel(x, y-1); 
+                Pixel diagonal1 = image.getPixel(x+1, y+1);
+                Pixel diagonal2 = image.getPixel(x-1, y-1);
+                Pixel diagonal3 = image.getPixel(x+1, y-1);
+                Pixel diagonal4 = image.getPixel(x-1, y+1);
+
+                Pixel[] surrounding = {center, adjacent1, adjacent2, adjacent3, adjacent4, diagonal1, diagonal2, diagonal3, diagonal4};
+                int[] weight = {4, 2, 2, 2, 2, 1, 1, 1, 1};
+                int[] heavyWeight = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+                int divideBy = 16;
+
+                if (w == 1){
+                    weight = heavyWeight;
+                    divideBy = 9;
+                }
+
+                int red = 0;
+                for (int i = 0; i < surrounding.length; i++){
+                    red += surrounding[i].getRed() * weight[i];
+                }
+                int redAvg = red/divideBy;
+
+                int green = 0;
+                for (int i = 0; i < surrounding.length; i++){
+                    green+= surrounding[i].getGreen() * weight[i];
+                }
+                int greenAvg = green/divideBy;
+
+                int blue = 0;
+                for (int i = 0; i < surrounding.length; i++){
+                    blue += surrounding[i].getBlue() * weight[i];
+                }
+                int blueAvg = blue/divideBy;
+
+                newCenter.setRed(redAvg);
+                newCenter.setGreen(greenAvg);
+                newCenter.setBlue(blueAvg);
+            }
+        }
+        blurred.draw();
     }
 
 }
