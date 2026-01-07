@@ -16,7 +16,7 @@ public class ImageManipulation {
         edgeDetection("cyberpunk2077.jpg", 20);
         reflectImage("cyberpunk2077.jpg");
         rotateImage("cyberpunk2077.jpg");*/
-        selectBlur("cyberpunk2077.jpg", 10, 10, 1000, 500, 1);
+        multipleBlur("cyberpunk2077.jpg", 10, 10, 1000, 500, 10);
     }
 
     /** CHALLENGE ONE: Grayscale
@@ -190,27 +190,24 @@ public class ImageManipulation {
     }
 
     //Implementation Crit B
-    public static void selectBlur(String pathToFile, int x1, int y1, int x2, int y2, int w){
-        APImage image = new APImage(pathToFile);
-        int width  = image.getWidth();
-        int height = image.getHeight();
-        APImage blurred = new APImage(pathToFile);
+    public static APImage selectBlur(APImage inputImage, int x1, int y1, int x2, int y2, int w){
+        APImage blurred = inputImage.clone();
         int left   = Math.min(x1, x2);  // left edge, finds the smaller value
         int right  = Math.max(x1, x2);  // right edge, finds the bigger value
         int top    = Math.min(y1, y2);  // top edge cuz y=0 is at the top in java
         int bottom = Math.max(y1, y2);  // bottom edge
         for (int x = left; x <= right; x++){
             for (int y = top; y <= bottom; y++){
-                Pixel center = image.getPixel(x, y);
+                Pixel center = inputImage.getPixel(x, y);
                 Pixel newCenter = blurred.getPixel(x, y);
-                Pixel adjacent1 = image.getPixel(x+1, y); 
-                Pixel adjacent2 = image.getPixel(x-1, y); 
-                Pixel adjacent3 = image.getPixel(x, y+1); 
-                Pixel adjacent4 = image.getPixel(x, y-1); 
-                Pixel diagonal1 = image.getPixel(x+1, y+1);
-                Pixel diagonal2 = image.getPixel(x-1, y-1);
-                Pixel diagonal3 = image.getPixel(x+1, y-1);
-                Pixel diagonal4 = image.getPixel(x-1, y+1);
+                Pixel adjacent1 = inputImage.getPixel(x+1, y); 
+                Pixel adjacent2 = inputImage.getPixel(x-1, y); 
+                Pixel adjacent3 = inputImage.getPixel(x, y+1); 
+                Pixel adjacent4 = inputImage.getPixel(x, y-1); 
+                Pixel diagonal1 = inputImage.getPixel(x+1, y+1);
+                Pixel diagonal2 = inputImage.getPixel(x-1, y-1);
+                Pixel diagonal3 = inputImage.getPixel(x+1, y-1);
+                Pixel diagonal4 = inputImage.getPixel(x-1, y+1);
 
                 Pixel[] surrounding = {center, adjacent1, adjacent2, adjacent3, adjacent4, diagonal1, diagonal2, diagonal3, diagonal4};
                 int[] weight = {4, 2, 2, 2, 2, 1, 1, 1, 1};
@@ -246,6 +243,17 @@ public class ImageManipulation {
             }
         }
         blurred.draw();
+        return blurred;
+    }
+
+    public static void multipleBlur(String pathToFile, int x1, int y1, int x2, int y2, int amount) {
+        APImage current = new APImage(pathToFile);
+        
+        for (int i = 0; i < amount; i++) {
+            current = selectBlur(current, x1, y1, x2, y2, 0);
+        }
+        
+        current.draw();
     }
 
 }
